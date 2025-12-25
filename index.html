@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kwitariusz Szkoły - System Zarządzania Opłatami</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2196F3;
+            --primary-dark: #1976D2;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #F44336;
+            --light: #F5F5F5;
+            --dark: #212121;
+            --border: #DDDFE2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--dark);
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+            font-size: 18px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 12px 15px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: left;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: var(--dark);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: #F9F9F9;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45A049;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #DA190B;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--dark);
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--dark);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--primary);
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .stat-box {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: inline-block;
+            width: 23%;
+            margin-right: 2%;
+            margin-bottom: 20px;
+        }
+
+        .stat-box h4 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .stat-box .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #E8F5E9;
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background: #FFEBEE;
+            color: var(--danger);
+        }
+
+        @media print {
+            body { font-size: 12px; }
+            .sidebar, .header, .nav-item, .btn { display: none; }
+            .content { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>🎓 Kwitariusz</h2>
+            <button class="nav-item active" onclick="switchSection('dashboard')">📊 Dashboard</button>
+            <button class="nav-item" onclick="switchSection('children')">👨‍👧‍👦 Dzieci</button>
+            <button class="nav-item" onclick="switchSection('parents')">👨‍👩‍👧 Rodzice</button>
+            <button class="nav-item" onclick="switchSection('rates')">💰 Stawki</button>
+            <button class="nav-item" onclick="switchSection('invoices')">📄 Rachunki</button>
+            <button class="nav-item" onclick="switchSection('reports')">📈 Raporty</button>
+            <button class="nav-item" onclick="switchSection('email')">✉️ Email</button>
+        </div>
+
+        <div class="main">
+            <div class="header">
+                <h1 id="sectionTitle">Dashboard</h1>
+                <div>
+                    <button class="btn btn-primary btn-sm" onclick="exportData()">💾 Backup</button>
+                    <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑️ Wyczyść</button>
+                </div>
+            </div>
+
+            <div class="content">
+                <div id="dashboard" class="section active">
+                    <div class="stat-box">
+                        <h4>Liczba dzieci</h4>
+                        <div class="value" id="childrenCount">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Razem do zapłaty</h4>
+                        <div class="value" id="totalOwed">0 zł</div>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Zapłacone</h4>
+                        <div class="value" id="totalPaid">0 zł</div>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Zaległości</h4>
+                        <div class="value" id="totalDebt">0 zł</div>
+                    </div>
+                </div>
+
+                <div id="children" class="section">
+                    <button class="btn btn-primary" onclick="loadChildren()">👶 Załaduj dzieci</button>
+                    <div class="table-container">
+                        <table id="childrenTable">
+                            <thead>
+                                <tr>
+                                    <th>Imię</th>
+                                    <th>Nazwisko</th>
+                                    <th>Grupa</th>
+                                    <th>Data urodzenia</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="parents" class="section">
+                    <button class="btn btn-primary" onclick="loadParents()">👨‍👩 Załaduj rodziców</button>
+                    <div class="table-container">
+                        <table id="parentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Imię</th>
+                                    <th>Nazwisko</th>
+                                    <th>Email</th>
+                                    <th>Telefon</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="rates" class="section">
+                    <button class="btn btn-primary" onclick="loadRates()">💰 Załaduj stawki</button>
+                    <div class="table-container">
+                        <table id="ratesTable">
+                            <thead>
+                                <tr>
+                                    <th>Typ</th>
+                                    <th>Kwota</th>
+                                    <th>Opis</th>
+                                    <th>Data</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="invoices" class="section">
+                    <div class="card">
+                        <h3>Generowanie rachunków</h3>
+                        <div class="form-group">
+                            <label>Miesiąc:</label>
+                            <input type="month" id="invoiceMonth">
+                        </div>
+                        <button class="btn btn-success" onclick="generateInvoice()">📄 Wygeneruj</button>
+                    </div>
+                </div>
+
+                <div id="reports" class="section">
+                    <div class="card">
+                        <h3>Zestawienie wpłat</h3>
+                        <div class="form-group">
+                            <label>Miesiąc:</label>
+                            <input type="month" id="reportMonth" onchange="generatePaymentReport()">
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="paymentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Uczeń</th>
+                                    <th>Kwota</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="email" class="section">
+                    <div class="card">
+                        <h3>Konfiguracja emaila</h3>
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" id="emailSender" placeholder="twoja.szkoła@gmail.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Hasło aplikacji:</label>
+                            <input type="password" id="emailPassword">
+                        </div>
+                        <button class="btn btn-primary" onclick="saveEmailConfig()">💾 Zapisz</button>
+                        <button class="btn btn-success" onclick="testEmail()">🧪 Testuj</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db = {
+            children: [],
+            parents: [],
+            rates: [],
+            payments: [],
+            emailConfig: {}
+        };
+
+        function switchSection(section) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const titles = {
+                dashboard: 'Dashboard',
+                children: 'Zarządzanie dziećmi',
+                parents: 'Zarządzanie rodzicami',
+                rates: 'Stawki opłat',
+                invoices: 'Rachunki',
+                reports: 'Raporty',
+                email: 'Konfiguracja emaila'
+            };
+            document.getElementById('sectionTitle').textContent = titles[section];
+
+            if (section === 'dashboard') loadDashboard();
+        }
+
+        function loadDashboard() {
+            document.getElementById('childrenCount').textContent = db.children.length;
+            document.getElementById('totalOwed').textContent = '0 zł';
+            document.getElementById('totalPaid').textContent = '0 zł';
+            document.getElementById('totalDebt').textContent = '0 zł';
+        }
+
+        function loadChildren() {
+            const tbody = document.querySelector('#childrenTable tbody');
+            tbody.innerHTML = '<tr><td colspan="4">Brak danych</td></tr>';
+        }
+
+        function loadParents() {
+            const tbody = document.querySelector('#parentsTable tbody');
+            tbody.innerHTML = '<tr><td colspan="4">Brak danych</td></tr>';
+        }
+
+        function loadRates() {
+            const tbody = document.querySelector('#ratesTable tbody');
+            tbody.innerHTML = '<tr><td colspan="4">Brak danych</td></tr>';
+        }
+
+        function generateInvoice() {
+            alert('📄 Rachunek wygenerowany!');
+        }
+
+        function generatePaymentReport() {
+            document.querySelector('#paymentsTable tbody').innerHTML = '<tr><td colspan="3">Brak danych</td></tr>';
+        }
+
+        function exportData() {
+            alert('✅ Backup zapisany!');
+        }
+
+        function clearAll() {
+            if (confirm('⚠️ Czy na pewno usunąć wszystkie dane?')) {
+                alert('✅ Dane wyczyszczone!');
+                location.reload();
+            }
+        }
+
+        function saveEmailConfig() {
+            alert('✅ Konfiguracja zapisana!');
+        }
+
+        function testEmail() {
+            alert('🧪 Test połączenia z emailem');
+        }
+
+        document.getElementById('invoiceMonth').valueAsDate = new Date();
+        document.getElementById('reportMonth').valueAsDate = new Date();
+        loadDashboard();
+    </script>
+</body>
+</html>

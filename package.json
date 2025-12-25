@@ -13,7 +13,6 @@
     "sqlite3": "^5.1.6",
     "nodemailer": "^6.9.3",
     "googleapis": "^118.0.0",
-    "electron-squirrel-startup": "^1.1.0"
   },
   "devDependencies": {
     "electron": "27.0.0",

@@ -1,0 +1,45 @@
+{
+  "name": "kwitariusz-szkoly",
+  "version": "1.0.0",
+  "description": "System zarządzania opłatami szkolnymi",
+  "main": "main.js",
+  "homepage": "./",
+  "scripts": {
+    "start": "electron .",
+    "electron-builder": "electron-builder",
+    "build": "npm run electron-builder -- --publish=never"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.6",
+    "nodemailer": "^6.9.3",
+    "googleapis": "^118.0.0",
+    "electron-squirrel-startup": "^1.1.0"
+  },
+  "devDependencies": {
+    "electron": "27.0.0",
+    "electron-builder": "24.6.4"
+  },
+  "build": {
+    "appId": "com.kwitariusz.app",
+    "productName": "Kwitariusz Szkoły",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Kwitariusz Szkoły"
+    }
+  }
+}
